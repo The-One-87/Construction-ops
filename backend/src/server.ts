@@ -17,7 +17,7 @@ import { seedIfEnabled } from "./db/seed";
 dotenv.config();
 
 const app = express();
-
+app.set("trust proxy", 1);
 /** REQUIRED on Railway (proxy sets X-Forwarded-For) */
 app.set("trust proxy", 1);
 

@@ -13,7 +13,7 @@ import { router as billing } from "./routes/billing";
 
 import { migrateIfEnabled } from "./db/migrate";
 import { seedIfEnabled } from "./db/seed";
-
+import { ensureSchema } from "./db/ensure";
 dotenv.config();
 
 const app = express();

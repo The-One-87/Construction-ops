@@ -2,12 +2,13 @@ import { sql } from "drizzle-orm";
 import { db } from "./client";
 
 export async function ensureSchema() {
-  // pgcrypto gives gen_random_uuid()
+  // gen_random_uuid() is from pgcrypto
   await db.execute(sql`CREATE EXTENSION IF NOT EXISTS pgcrypto;`);
 
+  // clients
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS clients (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      id varchar PRIMARY KEY DEFAULT (gen_random_uuid()::text),
       name text NOT NULL,
       brand text NOT NULL,
       industry text NOT NULL,
@@ -15,59 +16,59 @@ export async function ensureSchema() {
       logo text,
       is_active boolean DEFAULT true,
       config jsonb NOT NULL,
-      created_at timestamptz DEFAULT now(),
-      updated_at timestamptz DEFAULT now()
+      created_at timestamp DEFAULT now(),
+      updated_at timestamp DEFAULT now()
     );
   `);
 
+  // users
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS users (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      id varchar PRIMARY KEY DEFAULT (gen_random_uuid()::text),
       username text NOT NULL UNIQUE,
       password_hash text NOT NULL,
       role text NOT NULL DEFAULT 'client',
-      client_id uuid NULL REFERENCES clients(id) ON DELETE SET NULL,
-      created_at timestamptz DEFAULT now(),
-      updated_at timestamptz DEFAULT now()
+      client_id varchar,
+      created_at timestamp DEFAULT now(),
+      updated_at timestamp DEFAULT now()
     );
   `);
 
+  // module_data
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS module_data (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      client_id uuid NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+      id varchar PRIMARY KEY DEFAULT (gen_random_uuid()::text),
+      client_id varchar NOT NULL,
       module_type text NOT NULL,
       data jsonb NOT NULL,
-      created_at timestamptz DEFAULT now(),
-      updated_at timestamptz DEFAULT now()
+      created_at timestamp DEFAULT now(),
+      updated_at timestamp DEFAULT now()
     );
   `);
 
+  // presets
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS presets (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      id varchar PRIMARY KEY DEFAULT (gen_random_uuid()::text),
       name text NOT NULL,
       industry text NOT NULL,
       config jsonb NOT NULL,
       description text,
-      created_at timestamptz DEFAULT now()
+      created_at timestamp DEFAULT now()
     );
   `);
 
+  // subscriptions
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS subscriptions (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      client_id uuid NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+      id varchar PRIMARY KEY DEFAULT (gen_random_uuid()::text),
+      client_id varchar NOT NULL,
       stripe_customer_id text,
       stripe_subscription_id text,
       status text NOT NULL DEFAULT 'inactive',
-      current_period_end timestamptz,
-      created_at timestamptz DEFAULT now(),
-      updated_at timestamptz DEFAULT now()
+      current_period_end timestamp,
+      created_at timestamp DEFAULT now(),
+      updated_at timestamp DEFAULT now()
     );
   `);
-
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_users_client_id ON users(client_id);`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_module_data_client_id ON module_data(client_id);`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_client_id ON subscriptions(client_id);`);
 }

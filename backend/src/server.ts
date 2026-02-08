@@ -11,9 +11,9 @@ import { router as clients } from "./routes/clients";
 import { router as modules } from "./routes/modules";
 import { router as billing } from "./routes/billing";
 
-import { ensureSchema } from "./db/ensure";
-import { seedIfEnabled } from "./db/seed";
-import { migrateIfEnabled } from "./db/migrate";
+await ensureSchema();
+await migrateIfEnabled(); // only runs when DB_MIGRATE=true and drizzle folder exists
+await seedIfEnabled();
 
 dotenv.config();
 

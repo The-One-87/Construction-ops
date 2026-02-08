@@ -11,13 +11,14 @@ import { router as clients } from "./routes/clients";
 import { router as modules } from "./routes/modules";
 import { router as billing } from "./routes/billing";
 
-import { migrateIfEnabled } from "./db/migrate";
-import { seedIfEnabled } from "./db/seed";
 import { ensureSchema } from "./db/ensure";
+import { seedIfEnabled } from "./db/seed";
+import { migrateIfEnabled } from "./db/migrate";
+
 dotenv.config();
 
 const app = express();
-app.set("trust proxy", 1);
+
 /** REQUIRED on Railway (proxy sets X-Forwarded-For) */
 app.set("trust proxy", 1);
 
@@ -65,10 +66,13 @@ const port = Number(process.env.PORT || 8000);
 
 (async () => {
   try {
-    // 1) ensure tables exist BEFORE seed hits users table
+    // Guaranteed first boot: create tables if missing
+    await ensureSchema();
+
+    // Optional: if you later add migrations, keep them enabled
     await migrateIfEnabled();
 
-    // 2) optional demo seed (safe now)
+    // Safe now (tables exist)
     await seedIfEnabled();
 
     app.listen(port, "0.0.0.0", () => console.log(`API on :${port}`));

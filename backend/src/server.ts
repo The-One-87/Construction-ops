@@ -1,20 +1,3 @@
-import express from "express";
-import dotenv from "dotenv";
-import helmet from "helmet";
-import cors from "cors";
-import rateLimit from "express-rate-limit";
-
-import { router as health } from "./routes/health";
-import { router as auth } from "./routes/auth";
-import { router as admin } from "./routes/admin";
-import { router as clients } from "./routes/clients";
-import { router as modules } from "./routes/modules";
-import { router as billing } from "./routes/billing";
-
-await ensureSchema();
-await migrateIfEnabled(); // only runs when DB_MIGRATE=true and drizzle folder exists
-await seedIfEnabled();
-
 dotenv.config();
 
 const app = express();
@@ -38,19 +21,15 @@ app.use((req, _res, next) => {
 });
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: (process.env.CORS_ORIGINS || "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean),
+  credentials: true,
+}));
 
 app.use(express.json({ limit: "1mb" }));
-
-/** MUST be after trust proxy */
 app.use(rateLimit({ windowMs: 60_000, limit: 120 }));
 
 app.use("/api", health);
@@ -66,16 +45,18 @@ const port = Number(process.env.PORT || 8000);
 
 (async () => {
   try {
-    // Guaranteed first boot: create tables if missing
+    // 1. Always create tables first
     await ensureSchema();
 
-    // Optional: if you later add migrations, keep them enabled
+    // 2. Only runs if DB_MIGRATE=true
     await migrateIfEnabled();
 
-    // Safe now (tables exist)
+    // 3. Optional demo data
     await seedIfEnabled();
 
-    app.listen(port, "0.0.0.0", () => console.log(`API on :${port}`));
+    app.listen(port, "0.0.0.0", () =>
+      console.log(`API on :${port}`)
+    );
   } catch (e) {
     console.error("Startup error", e);
     process.exit(1);

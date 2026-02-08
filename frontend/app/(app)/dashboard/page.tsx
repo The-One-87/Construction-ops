@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Guard } from "../../../components/Guard";
+import Guard from "@/components/Guard";
 import { ThemeToggle } from "../../../components/ThemeToggle";
 import { me, logout } from "../../../lib/auth";
 import { Briefcase, ClipboardList, Users, UserRound, Truck, Calculator, FileText, CalendarDays, Mail, Banknote, Settings, Video, MapPin } from "lucide-react";

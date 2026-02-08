@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Guard } from "../../../components/Guard";
+import Guard from "@/components/Guard";
 import { api } from "../../../lib/api";
 
 export default function SettingsPage() {

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { login } from "../../../lib/auth";
+import { login } from "@/lib/auth";
 
 export default function LoginPage() {
   const [username, setUsername] = React.useState("client@demo.com");
